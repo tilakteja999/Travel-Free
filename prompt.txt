@@ -1,0 +1,219 @@
+================================================================================
+🚀 TRAVEL TIME — MASTER APPLICATION PROMPT (v3.5 PRODUCTION)
+================================================================================
+
+Project Name: Travel Time
+Framework: Flutter (Dart 3.x) — 100% Client-Side Web, Android & Windows Application
+Default Currency: Indian Rupees (INR / ₹)
+Live Local Server URL: http://localhost:8080
+
+🎯 OBJECTIVE & ARCHITECTURE OVERVIEW
+--------------------------------------------------------------------------------
+Build a complete, end-to-end travel booking web and mobile application targeting Web (`build/web`), Android, and Windows. The app features authentication with full profile name preservation, session persistence, client-side GPS location detection, destination autocomplete, dynamic tourist place & hotel listings with CORS-bypassed photos, room booking with local inventory locking, route transport search, interactive seat selection, digital e-tickets, review & rating systems, 24/7 help support, persistent profile widgets, hamburger navigation drawer, trip itinerary planner, user-scoped wishlist, and complete permission, profile, cancellation, and booking history management.
+
+Key Architectural Principles:
+1. Decoupled Clean Repository Pattern (`UI` -> `Controller/Provider` -> `Repository Interface` -> `Local Data Source`).
+2. Retro Travel Aesthetic design language with custom vector canvas painters (`RetroVanPainter`, `LoginBackgroundPainter`, `TransportScenicPainter`).
+3. Single Source of Truth Profile Display (`PersistentProfileWidget`) appearing in the header bar of all post-login screens with user initials avatar, first name display, and interactive dropdown menu (`ProfileDropdownMenu`).
+4. Global Post-Login Navigation Drawer (`TravelTimeNavigationDrawer`) sliding from left edge on browsing screens.
+5. Local Data Persistence via `SharedPreferences` for user session tokens, registered accounts, search history, review submissions, seat/room inventory status, itineraries, wishlist items, and notification preferences. Passwords hashed using SHA-256.
+6. CORS Image Proxying via `https://images.weserv.nl/?url=...` with loading indicators and graceful fallbacks.
+
+================================================================================
+📋 FEATURE MODULES & SPECIFICATIONS
+================================================================================
+
+1️⃣ AUTHENTICATION & ACCOUNT MANAGEMENT
+- Mobile/Email registration with SHA-256 salted password hashing and mandatory Full Name validation.
+- Default Demo Credentials:
+  • Mobile: 9876543210 | Password: Travel123! | Name: Travel Demo User
+  • Email: user@travel.com | Password: Travel123! | Name: Travel Demo User
+- OTP Verification: 6 individual input boxes, 120s expiry timer, 60s resend countdown.
+- Password Creation & Recovery: Real-time requirements checklist (Min 8 chars, A-Z, a-z, 0-9).
+- Account Persistence: Session memory with "Continue as [Full Name]" or "Switch Account" dialogs.
+
+2️⃣ PERSISTENT PROFILE WIDGET & PROFILE DISPLAY NAME
+- `PersistentProfileWidget` (`lib/widgets/persistent_profile_widget.dart`):
+  • Displays user initials avatar circle (e.g. `TU` or `TT`).
+  • Displays registered first name beside avatar on screens ≥360px (e.g. `"Travel"`, `"Tilak"`). Never displays phone numbers or raw email identifiers as display names.
+  • Interactive dropdown arrow (`Icons.keyboard_arrow_down`).
+- `ProfileDropdownMenu` (`lib/widgets/profile_dropdown_menu.dart`):
+  • Header showing Full Name, Email (if available), and masked mobile number (`+91 ******3210`).
+  • Quick Navigation: **My Profile**, **Settings**, **My Bookings**, and **Logout** (red).
+
+3️⃣ GLOBAL NAVIGATION DRAWER (`TravelTimeNavigationDrawer`)
+- ☰ Hamburger icon opening left sliding drawer on all main browsing screens.
+- Width: min 84% width / max 340px.
+- Sections:
+  • Header: Avatar + Full Name + Contact details + View Profile
+  • Explore: Home, Search Destination
+  • My Travel: My Trips / Bookings, My Itinerary, Wishlist
+  • Preferences: Notifications, Settings
+  • Support & Info: Help & Customer Support, Demo Mode Disclosures
+  • Account: Logout (red) with confirmation dialog.
+
+4️⃣ LOCATION DETECTION & DESTINATION SEARCH
+- Client-side GPS detection (`Geolocator`) + OpenStreetMap Nominatim reverse geocoding & IP geolocation (`http://ip-api.com/json/`) detecting starting point (e.g. Narasaraopet, Andhra Pradesh).
+- Autocomplete search with debounced suggestions for cities, towns, and landmarks.
+- From != To validation with error messaging.
+- Account-bound persistent search history with individual delete (✕) and clear history.
+
+5️⃣ TRAVEL DATE, TIME & TRAVELLER COUNT SELECTION
+- `DateTimeSelectorWidget`: Reusable date picker with quick chips (Today, Tomorrow, This Weekend, +7 Days), disabling past dates, max +180 days.
+- Traveller & Guest Count Selector: Adults (1-10, 12+ yrs), Children (0-6, 2-11 yrs), Infants (0-2, transport only), Rooms (1-5, max 2 adults + 1 child per room).
+- `HotelDateRangePicker`: Dual check-in & check-out date range picker auto-calculating nights ("📅 3 Nights - 4 Days").
+- `TravelSearchModel`: Stores `fromLocation`, `toLocation`, `departureDate`, `returnDate`, `hotelCheckIn`, `hotelCheckOut`, `adultsCount`, `childrenCount`, `infantsCount`, `roomsCount`, `isRoundTrip`.
+
+6️⃣ DYNAMIC PLACES & HOTEL LISTINGS
+- Curated place photos for Vijayawada, Narasaraopet, Guntur, Vizag, Hyderabad, Goa, etc.
+- Detailed place view: Open/close timings, historical info, bulleted sights checklist, tourist guide contact banner.
+- Hotels view: Room categories, pricing in ₹ (`rooms * price * nights`), amenities checklist (Free Wi-Fi, A/C, 24/7 Hot Water, Room Service, Smart TV), interactive room number selector.
+
+7️⃣ ROUTE TRANSPORT SEARCH & SEAT SELECTION
+- Search results for Trains, Buses, Flights, Cabs, Auto passing route parameters (`From → To`).
+- Non-airport town guidance for towns without airports.
+- Fare calculation: Adults 100%, Children 50%, Infants ₹0.
+- Interactive Seat Maps:
+  • Train Berth Selection: Coach picker (B1 3AC, S1 Sleeper) & berth types (Lower, Middle, Upper, Side Lower, Side Upper).
+  • Bus Seat Selection: Interactive 2+1 & 2+2 seat grid.
+  • Flight Seat Selection: Airplane fuselage window/middle/aisle seat map.
+
+8️⃣ CENTRAL LOCAL BOOKING REPOSITORY & LIFECYCLE
+- `BookingModel` (`lib/models/booking_model.dart`) supporting `BookingType` (train, bus, flight, hotel, auto, cab) and `BookingStatus` (draft, pendingPayment, confirmed, completed, cancelled, paymentFailed).
+- `LocalBookingRepository` (`lib/repositories/local_booking_repository.dart`) and `BookingProvider` (`lib/providers/booking_provider.dart`).
+- Persisted per user: `tt_bookings_[userId]`.
+- Seat/room locking on confirmation, cancellation releasing inventory, Completed state when travel date passes.
+
+9️⃣ MY ITINERARY / TRIP PLANNER
+- `ItineraryModel` (`lib/models/itinerary_model.dart`), `LocalItineraryRepository`, `ItineraryProvider`.
+- `ItineraryScreen` & `ItineraryDetailScreen`: Tabs for Upcoming, Past, and Draft Plans. Link confirmed bookings, add saved tourist places, day-by-day schedule notes, total cost sum, share itinerary, and PDF export with demo banner.
+
+🔟 WISHLIST & SAVED ITEMS
+- `WishlistItemModel`, `LocalWishlistRepository`, `WishlistProvider`, `WishlistScreen`.
+- Interactive heart buttons (filled/outlined) on Place cards, Hotel cards, and Transport cards.
+- Saved items persisted per user (`tt_wishlist_[userId]`).
+
+1️⃣1️⃣ SEARCH FILTERS & SORTING
+- `FilterBottomSheet`: Dual-thumb Price Range slider (₹0 – ₹10,000+), Star Rating checkboxes (3★, 4★, 5★), Amenities checklist, Transport choices (AC/Non-AC, Sleeper/Seater).
+- Active filter count badge indicator on header filter icon (e.g., "🔍 3").
+- Sorting options: Recommended, Price: Low to High, Price: High to Low, Rating: High to Low, Popularity.
+
+1️⃣2️⃣ PUSH NOTIFICATIONS & ALERTS
+- `NotificationService`: Handles booking confirmations, payment alerts, and travel reminders (24h and 2h before departure).
+
+1️⃣3️⃣ REVIEWS & RATINGS SYSTEM
+- `StarRatingWidget`, `ReviewCard`, `WriteReviewScreen`, `ReviewRepository`: Persists user location reviews and ratings in `SharedPreferences`.
+
+1️⃣4️⃣ HELP & CUSTOMER SUPPORT
+- FAQ Accordion, WhatsApp Deep Link Integration (`https://wa.me/919876543210`), Live Chat (`ChatSupportScreen`), and Report Issue Form (`ReportIssueForm`).
+
+1️⃣5️⃣ PERMISSION HANDLING & EMPTY/OFFLINE STATES
+- `PermissionHandler`: GPS, Notification, and Storage permission dialogs with fallbacks.
+
+1️⃣6️⃣ DEMO MODE DISCLOSURES
+- Non-intrusive demo banners across payment, tickets, tracking, support, and itineraries clarifying frontend-only simulated behavior.
+
+================================================================================
+📁 FILE STRUCTURE
+================================================================================
+lib/
+├── core/
+│   ├── config/app_config.dart
+│   ├── config/demo_mode_config.dart
+│   └── widgets/custom_image_widget.dart
+├── features/
+│   ├── date_time_selection/
+│   │   ├── travel_search_model.dart
+│   │   ├── date_time_selector_widget.dart
+│   │   └── hotel_date_range_picker.dart
+│   ├── filters_sorting/
+│   │   ├── filter_bottom_sheet.dart
+│   │   ├── filter_model.dart
+│   │   └── filter_repository.dart
+│   ├── notifications/
+│   │   └── notification_service.dart
+│   └── reviews_ratings/
+│       ├── review_card.dart
+│       ├── review_model.dart
+│       ├── review_repository.dart
+│       └── write_review_screen.dart
+├── models/
+│   ├── booking_model.dart
+│   ├── inventory_model.dart
+│   ├── itinerary_model.dart
+│   ├── location_model.dart
+│   ├── travel_data.dart
+│   └── wishlist_item_model.dart
+├── providers/
+│   ├── booking_provider.dart
+│   ├── itinerary_provider.dart
+│   └── wishlist_provider.dart
+├── repositories/
+│   ├── availability_repository.dart
+│   ├── hotel_repository.dart
+│   ├── local_booking_repository.dart
+│   ├── local_itinerary_repository.dart
+│   ├── local_wishlist_repository.dart
+│   ├── location_repository.dart
+│   ├── places_repository.dart
+│   └── transport_repository.dart
+├── screens/
+│   ├── booking_detail_screen.dart
+│   ├── booking_history_screen.dart
+│   ├── booking_success_screen.dart
+│   ├── bookings_screen.dart
+│   ├── bus_seat_selection_screen.dart
+│   ├── cancel_booking_screen.dart
+│   ├── change_password_screen.dart
+│   ├── chat_support_screen.dart
+│   ├── create_password_screen.dart
+│   ├── flight_seat_selection_screen.dart
+│   ├── forgot_password_screen.dart
+│   ├── help_center_screen.dart
+│   ├── home_screen.dart
+│   ├── hotel_detail_screen.dart
+│   ├── hotel_room_selection_screen.dart
+│   ├── itinerary_detail_screen.dart
+│   ├── itinerary_screen.dart
+│   ├── location_search_screen.dart
+│   ├── login_screen.dart
+│   ├── notification_settings_screen.dart
+│   ├── otp_verification_screen.dart
+│   ├── passenger_details_screen.dart
+│   ├── payment_failure_screen.dart
+│   ├── payment_screen.dart
+│   ├── payment_success_screen.dart
+│   ├── place_detail_screen.dart
+│   ├── places_hotels_screen.dart
+│   ├── profile_screen.dart
+│   ├── report_issue_form.dart
+│   ├── settings_screen.dart
+│   ├── signup_screen.dart
+│   ├── train_berth_selection_screen.dart
+│   └── wishlist_screen.dart
+├── services/
+│   ├── auth_service.dart
+│   ├── image_service.dart
+│   ├── local_availability_service.dart
+│   ├── location_service.dart
+│   ├── permission_handler.dart
+│   └── search_history_service.dart
+├── theme/
+│   └── app_theme.dart
+├── widgets/
+│   ├── app_bar_with_profile.dart
+│   ├── custom_illustrations.dart
+│   ├── demo_mode_banner.dart
+│   ├── image_placeholder.dart
+│   ├── loading_overlay.dart
+│   ├── persistent_profile_widget.dart
+│   ├── profile_dropdown_menu.dart
+│   ├── progress_bar.dart
+│   ├── results_filter_header.dart
+│   ├── shimmer_card.dart
+│   ├── tourist_guide_sheet.dart
+│   ├── travel_time_navigation_drawer.dart
+│   └── whatsapp_support_button.dart
+└── main.dart
+
+================================================================================
