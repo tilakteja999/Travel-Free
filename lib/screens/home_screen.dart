@@ -25,17 +25,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late TextEditingController _locationController;
-  bool _hasSearched = false;
 
   @override
   void initState() {
     super.initState();
-    final initialDest = widget.toLocation ?? widget.searchModel?.toLocation ?? '';
+    final initialDest = widget.toLocation ?? widget.searchModel?.toLocation ?? 'Tirupati';
     _locationController = TextEditingController(text: initialDest);
-
-    if (initialDest.isNotEmpty) {
-      _hasSearched = true;
-    }
   }
 
   void _onSearchSubmitted() {
@@ -46,9 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-    setState(() {
-      _hasSearched = true;
-    });
+    _navigateToPlaces();
   }
 
   void _navigateToPlaces() {
@@ -115,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     bottom: 20,
                     child: Container(
-                      width: size.width > 420 ? 360 : size.width * 0.84,
+                      width: size.width > 420 ? 360 : size.width * 0.86,
                       height: size.height * 0.52,
                       decoration: BoxDecoration(
                         color: const Color(0xFF2EA5B0),
@@ -134,121 +127,102 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       child: Stack(
-                        alignment: Alignment.topCenter,
+                        alignment: Alignment.center,
                         children: [
-                          // Rear Window / Windshield Section
-                          Positioned(
-                            top: 24,
-                            child: Container(
-                              width: 250,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF7F2E7),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Colors.black12, width: 2),
-                              ),
-                              child: Center(
-                                child: _hasSearched
-                                    ? SizedBox(
-                                        width: 190,
-                                        height: 48,
-                                        child: ElevatedButton.icon(
-                                          onPressed: _navigateToTransport,
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppColors.primaryBlue,
-                                            foregroundColor: Colors.white,
-                                            elevation: 3,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
-                                            ),
-                                          ),
-                                          icon: const Icon(Icons.confirmation_number, size: 20),
-                                          label: const Text(
-                                            'Bookings',
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                    : const Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 16),
-                                        child: Text(
-                                          'Enter destination above & tap search 🔍',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: Colors.black54,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 13,
-                                          ),
-                                        ),
-                                      ),
-                              ),
+                          // Central Panel containing BOTH Bookings & Places Buttons
+                          Container(
+                            width: 290,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFAF2E1),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(color: Colors.black26, width: 2),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 8,
+                                  offset: Offset(0, 4),
+                                )
+                              ],
                             ),
-                          ),
-
-                          // Lower Panel with License Plate & Places Button
-                          Positioned(
-                            bottom: 50,
-                            child: Container(
-                              width: 280,
-                              height: 180,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFAF2E1),
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.black12, width: 1.5),
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  // License Plate "Travel time"
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFFBE4C5),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(color: Colors.black26, width: 2),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // License Plate "Travel time"
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFBE4C5),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(color: Colors.black26, width: 1.5),
+                                  ),
+                                  child: const Text(
+                                    '• Travel time •',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.textDark,
+                                      fontFamily: 'serif',
                                     ),
-                                    child: const Text(
-                                      '• Travel time •',
+                                  ),
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                // 1. BOOKINGS BUTTON (Trains, Buses, Flights)
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 48,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _navigateToTransport,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primaryBlue,
+                                      foregroundColor: Colors.white,
+                                      elevation: 3,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    icon: const Icon(Icons.confirmation_number, size: 20),
+                                    label: const Text(
+                                      'Bookings',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.textDark,
-                                        fontFamily: 'serif',
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
                                   ),
-                                  if (_hasSearched) ...[
-                                    const SizedBox(height: 12),
-                                    // Places Button appears only after entering destination & pressing search
-                                    SizedBox(
-                                      width: 190,
-                                      height: 48,
-                                      child: ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF33C19C),
-                                          foregroundColor: Colors.white,
-                                          elevation: 3,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(16),
-                                          ),
-                                        ),
-                                        onPressed: _navigateToPlaces,
-                                        icon: const Icon(Icons.account_balance, size: 20),
-                                        label: const Text(
-                                          'Places',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                // 2. PLACES BUTTON (Attractions & Hotels)
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 48,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF33C19C),
+                                      foregroundColor: Colors.white,
+                                      elevation: 3,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
                                     ),
-                                  ],
-                                ],
-                              ),
+                                    onPressed: _navigateToPlaces,
+                                    icon: const Icon(Icons.account_balance, size: 20),
+                                    label: const Text(
+                                      'Places',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
