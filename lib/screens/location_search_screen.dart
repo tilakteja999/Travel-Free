@@ -28,11 +28,6 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
   DateTime _selectedDepartureDate = DateTime.now().add(const Duration(days: 1));
 
-  int _adultsCount = 1;
-  int _childrenCount = 0;
-  int _infantsCount = 0;
-  int _roomsCount = 1;
-
   List<String> _suggestions = [];
   bool _showSuggestions = false;
   bool _isSearching = false;
@@ -232,10 +227,6 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       toLocation: cleanTo,
       departureDate: _selectedDepartureDate,
       searchType: 'general',
-      adultsCount: _adultsCount,
-      childrenCount: _childrenCount,
-      infantsCount: _infantsCount,
-      roomsCount: _roomsCount,
     );
 
     // Navigate to HomeScreen displaying Bookings and Places options for entered destination
@@ -269,66 +260,6 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     final activeUser = AuthService().getActiveUserIdentifier() ?? 'guest';
     await SearchHistoryService().clearHistory(activeUser);
     _loadSearchHistory();
-  }
-
-  Widget _buildCounterRow(String label, int value, ValueChanged<int> onChanged) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textDark,
-          ),
-        ),
-        Row(
-          children: [
-            InkWell(
-              onTap: () => onChanged(value - 1),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.black26),
-                  color: Colors.white,
-                ),
-                child: const Icon(Icons.remove, size: 18, color: AppColors.textDark),
-              ),
-            ),
-            SizedBox(
-              width: 36,
-              child: Text(
-                '$value',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
-                ),
-              ),
-            ),
-            InkWell(
-              onTap: () => onChanged(value + 1),
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primaryBlue),
-                  color: AppColors.primaryBlue,
-                ),
-                child: const Icon(Icons.add, size: 18, color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
   }
 
   @override
@@ -638,40 +569,6 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                   _selectedDepartureDate = dt;
                                 });
                               },
-                            ),
-
-                            const SizedBox(height: 18),
-
-                            // TRAVELLERS & ROOMS SECTION
-                            const Text(
-                              'TRAVELLERS & ROOMS',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black54,
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF4F4F4),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.black12, width: 1.5),
-                              ),
-                              child: Column(
-                                children: [
-                                  _buildCounterRow('Adults (12+ yrs)', _adultsCount, (val) => setState(() => _adultsCount = val.clamp(1, 10))),
-                                  const Divider(height: 16),
-                                  _buildCounterRow('Children (2-11 yrs)', _childrenCount, (val) => setState(() => _childrenCount = val.clamp(0, 6))),
-                                  const Divider(height: 16),
-                                  _buildCounterRow('Infants (0-2 yrs)', _infantsCount, (val) => setState(() => _infantsCount = val.clamp(0, 2))),
-                                  const Divider(height: 16),
-                                  _buildCounterRow('Rooms', _roomsCount, (val) => setState(() => _roomsCount = val.clamp(1, 5))),
-                                ],
-                              ),
                             ),
 
                             // Red Error Display
